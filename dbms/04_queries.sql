@@ -252,3 +252,219 @@ AND "userId" = 'USER_ID';
 DELETE FROM "Comment"
 WHERE id = 1
 AND "userId" = 'USER_ID';
+
+
+-- 7. TRENDING AND CREATOR QUERIES
+
+-- 30. Get trending stories based on likes
+SELECT
+    s.id,
+    s.title,
+    s."coverImage",
+    u.name AS author,
+    COUNT(l.id) AS total_likes
+FROM story s
+JOIN "user" u ON s."authorId" = u.id
+LEFT JOIN "Like" l ON s.id = l."storyId"
+WHERE s.visibility = 'PUBLIC'
+GROUP BY s.id, s.title, s."coverImage", u.name
+ORDER BY total_likes DESC
+LIMIT 10;
+
+
+-- 31. Get top creators based on published stories
+SELECT
+    u.id,
+    u.name,
+    COUNT(s.id) AS published_stories
+FROM "user" u
+JOIN story s ON u.id = s."authorId"
+WHERE s.visibility = 'PUBLIC'
+GROUP BY u.id, u.name
+ORDER BY published_stories DESC
+LIMIT 10;
+
+
+-- 32. Get creator statistics
+SELECT
+    u.id,
+    u.name,
+    COUNT(DISTINCT s.id) AS total_stories,
+    COUNT(DISTINCT l.id) AS total_likes,
+    COUNT(DISTINCT c.id) AS total_comments
+FROM "user" u
+LEFT JOIN story s ON u.id = s."authorId"
+LEFT JOIN "Like" l ON s.id = l."storyId"
+LEFT JOIN "Comment" c ON s.id = c."storyId"
+WHERE u.id = 'USER_ID'
+GROUP BY u.id, u.name;
+
+
+-- 8. SUBSCRIPTION PLAN QUERIES
+
+-- 33. Get all active subscription plans
+SELECT *
+FROM "SubscriptionPlan"
+WHERE "isActive" = TRUE
+ORDER BY price ASC;
+
+
+-- 34. Add a subscription plan
+INSERT INTO "SubscriptionPlan"
+    (name, description, price, "durationMonths", "isActive")
+VALUES
+    ('Ryth Premium', 'Premium access to RythCore', 499.00, 1, TRUE);
+
+
+-- 35. Update a subscription plan
+UPDATE "SubscriptionPlan"
+SET price = 599.00,
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE id = 1;
+
+
+-- 9. SUBSCRIPTION QUERIES
+
+-- 36. Get a user's subscriptions
+SELECT
+    sub.id,
+    u.name AS user_name,
+    p.name AS plan_name,
+    sub.status,
+    sub."startDate",
+    sub."endDate"
+FROM "Subscription" sub
+JOIN "user" u ON sub."userId" = u.id
+JOIN "SubscriptionPlan" p ON sub."planId" = p.id
+WHERE sub."userId" = 'USER_ID'
+ORDER BY sub."createdAt" DESC;
+
+
+-- 37. Get all currently active subscriptions
+SELECT
+    u.name,
+    u.email,
+    p.name AS plan_name,
+    sub."startDate",
+    sub."endDate"
+FROM "Subscription" sub
+JOIN "user" u ON sub."userId" = u.id
+JOIN "SubscriptionPlan" p ON sub."planId" = p.id
+WHERE sub.status = 'ACTIVE'
+AND sub."endDate" > CURRENT_TIMESTAMP;
+
+
+-- 38. Count active subscriptions
+SELECT COUNT(*) AS active_subscriptions
+FROM "Subscription"
+WHERE status = 'ACTIVE'
+AND "endDate" > CURRENT_TIMESTAMP;
+
+
+-- 39. Expire subscriptions whose end date has passed
+UPDATE "Subscription"
+SET status = 'EXPIRED',
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE status = 'ACTIVE'
+AND "endDate" <= CURRENT_TIMESTAMP;
+
+
+-- 10. PAYMENT QUERIES
+
+-- 40. Get payment history of a user
+SELECT
+    pay.id,
+    pay.amount,
+    pay.currency,
+    pay.status,
+    pay."paymentProvider",
+    pay."providerPaymentId",
+    pay."paymentDate",
+    sub.id AS subscription_id
+FROM "Payment" pay
+JOIN "Subscription" sub ON pay."subscriptionId" = sub.id
+WHERE sub."userId" = 'USER_ID'
+ORDER BY pay."createdAt" DESC;
+
+
+-- 41. Get successful payments
+SELECT *
+FROM "Payment"
+WHERE status = 'SUCCESS'
+ORDER BY "paymentDate" DESC;
+
+
+-- 42. Calculate total successful revenue
+SELECT
+    currency,
+    SUM(amount) AS total_revenue
+FROM "Payment"
+WHERE status = 'SUCCESS'
+GROUP BY currency;
+
+
+-- 43. Count payments by status
+SELECT
+    status,
+    COUNT(*) AS total_payments
+FROM "Payment"
+GROUP BY status;
+
+
+-- 44. Find a payment using Razorpay payment ID
+SELECT *
+FROM "Payment"
+WHERE "providerPaymentId" = 'RAZORPAY_PAYMENT_ID';
+
+
+-- 11. DASHBOARD QUERIES
+
+-- 45. RythCore dashboard statistics
+SELECT
+    (SELECT COUNT(*) FROM "user") AS total_users,
+
+    (SELECT COUNT(*)
+     FROM story
+     WHERE visibility = 'PUBLIC') AS published_stories,
+
+    (SELECT COUNT(*)
+     FROM "Like") AS total_likes,
+
+    (SELECT COUNT(*)
+     FROM "Comment") AS total_comments,
+
+    (SELECT COUNT(*)
+     FROM "Bookmark") AS total_bookmarks,
+
+    (SELECT COUNT(*)
+     FROM "Subscription"
+     WHERE status = 'ACTIVE'
+     AND "endDate" > CURRENT_TIMESTAMP) AS active_subscriptions;
+
+
+-- 46. Get recently joined users
+SELECT id, name, email, "createdAt"
+FROM "user"
+ORDER BY "createdAt" DESC
+LIMIT 10;
+
+
+-- 47. Get stories published this month
+SELECT id, title, "publishedAt"
+FROM story
+WHERE visibility = 'PUBLIC'
+AND "publishedAt" >= DATE_TRUNC('month', CURRENT_TIMESTAMP)
+ORDER BY "publishedAt" DESC;
+
+
+-- 48. Get most commented stories
+SELECT
+    s.id,
+    s.title,
+    COUNT(c.id) AS total_comments
+FROM story s
+LEFT JOIN "Comment" c ON s.id = c."storyId"
+WHERE s.visibility = 'PUBLIC'
+GROUP BY s.id, s.title
+ORDER BY total_comments DESC
+LIMIT 10;
