@@ -158,9 +158,7 @@ DELETE FROM story
 WHERE id = 1;
 
 
--- =====================================================
 -- 4. LIKE QUERIES
--- =====================================================
 
 -- 19. Like a story
 INSERT INTO "Like" ("userId", "storyId")
@@ -192,3 +190,65 @@ SELECT EXISTS (
     WHERE "userId" = 'USER_ID'
     AND "storyId" = 1
 ) AS is_liked;
+
+
+-- 5. BOOKMARK QUERIES
+
+
+-- 23. Bookmark a story
+INSERT INTO "Bookmark" ("userId", "storyId")
+VALUES ('USER_ID', 1)
+ON CONFLICT ("userId", "storyId") DO NOTHING;
+
+
+-- 24. Remove a bookmark
+DELETE FROM "Bookmark"
+WHERE "userId" = 'USER_ID'
+AND "storyId" = 1;
+
+
+-- 25. Get all bookmarked stories of a user
+SELECT
+    s.id,
+    s.title,
+    s.excerpt,
+    s."coverImage",
+    b."createdAt"
+FROM "Bookmark" b
+JOIN story s ON b."storyId" = s.id
+WHERE b."userId" = 'USER_ID'
+ORDER BY b."createdAt" DESC;
+
+
+-- 6. COMMENT QUERIES
+
+-- 26. Add a comment to a story
+INSERT INTO "Comment" ("content", "userId", "storyId")
+VALUES ('This is a very informative story.', 'USER_ID', 1);
+
+
+-- 27. Get all comments on a story
+SELECT
+    c.id,
+    c.content,
+    c."createdAt",
+    u.name AS commenter,
+    u.image AS profile_image
+FROM "Comment" c
+JOIN "user" u ON c."userId" = u.id
+WHERE c."storyId" = 1
+ORDER BY c."createdAt" DESC;
+
+
+-- 28. Update a comment
+UPDATE "Comment"
+SET content = 'Updated comment',
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE id = 1
+AND "userId" = 'USER_ID';
+
+
+-- 29. Delete a comment
+DELETE FROM "Comment"
+WHERE id = 1
+AND "userId" = 'USER_ID';
