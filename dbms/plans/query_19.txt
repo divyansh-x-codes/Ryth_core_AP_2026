@@ -1,0 +1,31 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #19: Like a story
+Category: Like Queries
+Operation Type: INSERT
+Primary Plan Node: Insert on like (ON CONFLICT)
+Cost Range: 0.00..0.01
+Planning Time: 0.068 ms
+Execution Time: 0.085 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+INSERT INTO "Like" ("userId", "storyId")
+VALUES ('USER_ID', 1)
+ON CONFLICT ("userId", "storyId") DO NOTHING;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Insert on "like"  (cost=0.00..0.01 rows=1 width=40) (actual time=0.065..0.066 rows=1 loops=1)
+  Conflict Resolution: NOTHING
+  Conflict Arbiter Indexes: like_userId_storyId_key
+  Buffers: shared hit=5 dirtied=1
+  ->  Result  (cost=0.00..0.01 rows=1 width=40) (actual time=0.002..0.002 rows=1 loops=1)
+Planning Time: 0.068 ms
+Execution Time: 0.085 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+High-concurrency engagement write protected by UNIQUE ("userId", "storyId") constraint. Arbiter index prevents duplicates without throwing exceptions.
+Baseline Latency (Unindexed / Full Scan): 0.085 ms
+Optimized Latency (With Schema Indexes): 0.085 ms
+Speedup Factor: 1.00x
+================================================================================

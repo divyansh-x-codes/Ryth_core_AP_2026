@@ -1,0 +1,32 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #03: Get all creators
+Category: User Queries
+Operation Type: SELECT
+Primary Plan Node: Bitmap Heap Scan (idx_user_role)
+Cost Range: 38.45..421.12
+Planning Time: 0.095 ms
+Execution Time: 1.140 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT id, name, email, image
+FROM "user"
+WHERE role = 'creator';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Bitmap Heap Scan on "user"  (cost=38.45..421.12 rows=2450 width=82) (actual time=0.210..0.980 rows=2450 loops=1)
+  Recheck Cond: (role = 'creator'::text)
+  Buffers: shared hit=184
+  ->  Bitmap Index Scan on idx_user_role  (cost=0.00..37.84 rows=2450 width=0) (actual time=0.150..0.150 rows=2450 loops=1)
+        Index Cond: (role = 'creator'::text)
+        Buffers: shared hit=8
+Planning Time: 0.095 ms
+Execution Time: 1.140 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Bitmap index scan on idx_user_role creates a memory bitmap of pages containing matching creators, avoiding random page I/O by visiting pages in physical disk order.
+Baseline Latency (Unindexed / Full Scan): 3.820 ms
+Optimized Latency (With Schema Indexes): 1.140 ms
+Speedup Factor: 3.35x
+================================================================================

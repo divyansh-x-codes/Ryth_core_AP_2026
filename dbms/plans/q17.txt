@@ -1,0 +1,34 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #17: Update story details
+Category: Story Queries
+Operation Type: UPDATE
+Primary Plan Node: Update -> Index Scan (story_pkey)
+Cost Range: 0.29..8.31
+Planning Time: 0.088 ms
+Execution Time: 0.225 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+UPDATE story
+SET title = 'Updated Story Title',
+    excerpt = 'Updated story description',
+    content = 'Updated story content',
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE id = 1;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Update on story  (cost=0.29..8.31 rows=1 width=330) (actual time=0.192..0.193 rows=1 loops=1)
+  Buffers: shared hit=8 dirtied=2
+  ->  Index Scan using story_pkey on story  (cost=0.29..8.31 rows=1 width=330) (actual time=0.022..0.024 rows=1 loops=1)
+        Index Cond: (id = 1)
+        Buffers: shared hit=3
+Planning Time: 0.088 ms
+Execution Time: 0.225 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Direct Primary Key point update updating content columns.
+Baseline Latency (Unindexed / Full Scan): 6.800 ms
+Optimized Latency (With Schema Indexes): 0.225 ms
+Speedup Factor: 30.22x
+================================================================================

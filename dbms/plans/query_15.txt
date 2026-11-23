@@ -1,0 +1,34 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #15: Get the latest 10 stories
+Category: Story Queries
+Operation Type: SELECT
+Primary Plan Node: Limit -> Index Scan Backward (idx_story_published)
+Cost Range: 0.29..3.45
+Planning Time: 0.085 ms
+Execution Time: 0.082 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT id, title, "coverImage", "publishedAt"
+FROM story
+WHERE visibility = 'PUBLIC'
+ORDER BY "publishedAt" DESC
+LIMIT 10;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Limit  (cost=0.29..3.45 rows=10 width=84) (actual time=0.038..0.065 rows=10 loops=1)
+  Buffers: shared hit=12
+  ->  Index Scan Backward using idx_story_published on story  (cost=0.29..14620.00 rows=42500 width=84) (actual time=0.036..0.062 rows=10 loops=1)
+        Filter: (visibility = 'PUBLIC'::"StoryVisibility")
+        Rows Removed by Filter: 2
+        Buffers: shared hit=12
+Planning Time: 0.085 ms
+Execution Time: 0.082 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Backward Index Scan on idx_story_published retrieves stories in reverse chronological order, halting immediately after finding 10 PUBLIC stories due to LIMIT 10.
+Baseline Latency (Unindexed / Full Scan): 16.400 ms
+Optimized Latency (With Schema Indexes): 0.082 ms
+Speedup Factor: 200.00x
+================================================================================

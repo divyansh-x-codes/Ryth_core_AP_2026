@@ -1,0 +1,36 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #38: Count active subscriptions
+Category: Subscription Queries
+Operation Type: SELECT
+Primary Plan Node: Aggregate -> Bitmap Heap Scan
+Cost Range: 68.50..757.21
+Planning Time: 0.085 ms
+Execution Time: 1.960 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT COUNT(*) AS active_subscriptions
+FROM "Subscription"
+WHERE status = 'ACTIVE'
+AND "endDate" > CURRENT_TIMESTAMP;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Aggregate  (cost=757.20..757.21 rows=1 width=8) (actual time=1.920..1.921 rows=1 loops=1)
+  Buffers: shared hit=192
+  ->  Bitmap Heap Scan on subscription  (cost=68.50..745.20 rows=4800 width=0) (actual time=0.420..1.650 rows=4800 loops=1)
+        Recheck Cond: (status = 'ACTIVE'::"SubscriptionStatus")
+        Filter: ("endDate" > CURRENT_TIMESTAMP)
+        Buffers: shared hit=192
+        ->  Bitmap Index Scan on idx_subscription_status  (cost=0.00..67.30 rows=5200 width=0) (actual time=0.360..0.360 rows=5200 loops=1)
+              Index Cond: (status = 'ACTIVE'::"SubscriptionStatus")
+              Buffers: shared hit=12
+Planning Time: 0.085 ms
+Execution Time: 1.960 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Aggregate over filtered bitmap heap scan using idx_subscription_status index.
+Baseline Latency (Unindexed / Full Scan): 6.200 ms
+Optimized Latency (With Schema Indexes): 1.960 ms
+Speedup Factor: 3.16x
+================================================================================

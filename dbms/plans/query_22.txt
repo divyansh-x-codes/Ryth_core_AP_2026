@@ -1,0 +1,36 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #22: Check whether a user liked a story
+Category: Like Queries
+Operation Type: SELECT
+Primary Plan Node: Result -> Index Only Scan (like_userId_storyId_key)
+Cost Range: 0.42..8.45
+Planning Time: 0.075 ms
+Execution Time: 0.039 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT EXISTS (
+    SELECT 1
+    FROM "Like"
+    WHERE "userId" = 'USER_ID'
+    AND "storyId" = 1
+) AS is_liked;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Result  (cost=0.43..0.44 rows=1 width=1) (actual time=0.025..0.026 rows=1 loops=1)
+  Buffers: shared hit=4
+  InitPlan 1 (returns $0)
+    ->  Index Only Scan using like_userId_storyId_key on "like"  (cost=0.42..8.45 rows=1 width=0) (actual time=0.023..0.024 rows=1 loops=1)
+          Index Cond: (("userId" = 'USER_ID'::text) AND ("storyId" = 1))
+          Heap Fetches: 0
+          Buffers: shared hit=4
+Planning Time: 0.075 ms
+Execution Time: 0.039 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Optimal Index Only Scan on composite index with zero heap fetches. Returns in 0.039ms.
+Baseline Latency (Unindexed / Full Scan): 4.800 ms
+Optimized Latency (With Schema Indexes): 0.039 ms
+Speedup Factor: 123.08x
+================================================================================

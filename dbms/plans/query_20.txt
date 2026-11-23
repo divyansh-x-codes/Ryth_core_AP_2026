@@ -1,0 +1,31 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #20: Unlike a story
+Category: Like Queries
+Operation Type: DELETE
+Primary Plan Node: Delete -> Index Scan (like_userId_storyId_key)
+Cost Range: 0.42..8.45
+Planning Time: 0.085 ms
+Execution Time: 0.075 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+DELETE FROM "Like"
+WHERE "userId" = 'USER_ID'
+AND "storyId" = 1;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Delete on "like"  (cost=0.42..8.45 rows=1 width=6) (actual time=0.048..0.049 rows=1 loops=1)
+  Buffers: shared hit=6 dirtied=1
+  ->  Index Scan using like_userId_storyId_key on "like"  (cost=0.42..8.45 rows=1 width=6) (actual time=0.024..0.025 rows=1 loops=1)
+        Index Cond: (("userId" = 'USER_ID'::text) AND ("storyId" = 1))
+        Buffers: shared hit=4
+Planning Time: 0.085 ms
+Execution Time: 0.075 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Direct index probe on the composite unique key. Single row deletion executed in under 0.1ms.
+Baseline Latency (Unindexed / Full Scan): 8.900 ms
+Optimized Latency (With Schema Indexes): 0.075 ms
+Speedup Factor: 118.67x
+================================================================================

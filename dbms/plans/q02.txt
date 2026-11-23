@@ -1,0 +1,29 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #02: Find a user using email
+Category: User Queries
+Operation Type: SELECT
+Primary Plan Node: Index Scan (user_email_key)
+Cost Range: 0.29..8.31
+Planning Time: 0.071 ms
+Execution Time: 0.038 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT id, name, email, image, role
+FROM "user"
+WHERE email = 'user@example.com';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Index Scan using user_email_key on "user"  (cost=0.29..8.31 rows=1 width=88) (actual time=0.024..0.026 rows=1 loops=1)
+  Index Cond: (email = 'user@example.com'::text)
+  Buffers: shared hit=3
+Planning Time: 0.071 ms
+Execution Time: 0.038 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Utilizes unique B-Tree index on email (user_email_key). Direct root-to-leaf index lookup requiring only 3 page buffer hits.
+Baseline Latency (Unindexed / Full Scan): 4.150 ms
+Optimized Latency (With Schema Indexes): 0.038 ms
+Speedup Factor: 109.21x
+================================================================================

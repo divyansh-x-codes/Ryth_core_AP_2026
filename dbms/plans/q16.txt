@@ -1,0 +1,35 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #16: Publish a draft story
+Category: Story Queries
+Operation Type: UPDATE
+Primary Plan Node: Update -> Index Scan (story_pkey)
+Cost Range: 0.29..8.31
+Planning Time: 0.095 ms
+Execution Time: 0.210 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+UPDATE story
+SET visibility = 'PUBLIC',
+    "publishedAt" = CURRENT_TIMESTAMP,
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE id = 1
+AND visibility = 'DRAFT';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Update on story  (cost=0.29..8.31 rows=1 width=330) (actual time=0.185..0.186 rows=1 loops=1)
+  Buffers: shared hit=8 dirtied=2
+  ->  Index Scan using story_pkey on story  (cost=0.29..8.31 rows=1 width=330) (actual time=0.024..0.026 rows=1 loops=1)
+        Index Cond: (id = 1)
+        Filter: (visibility = 'DRAFT'::"StoryVisibility")
+        Buffers: shared hit=3
+Planning Time: 0.095 ms
+Execution Time: 0.210 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Primary key index lookup on id=1. Verifies DRAFT visibility condition and modifies tuple in place.
+Baseline Latency (Unindexed / Full Scan): 6.850 ms
+Optimized Latency (With Schema Indexes): 0.210 ms
+Speedup Factor: 32.62x
+================================================================================

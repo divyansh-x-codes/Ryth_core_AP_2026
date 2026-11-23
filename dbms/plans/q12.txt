@@ -1,0 +1,41 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #12: Get all stories written by a creator
+Category: Story Queries
+Operation Type: SELECT
+Primary Plan Node: Sort -> Bitmap Heap Scan (idx_story_author)
+Cost Range: 4.58..42.25
+Planning Time: 0.098 ms
+Execution Time: 0.115 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    s.id,
+    s.title,
+    s.visibility,
+    s."createdAt"
+FROM story s
+WHERE s."authorId" = 'USER_ID'
+ORDER BY s."createdAt" DESC;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Sort  (cost=42.15..42.25 rows=38 width=64) (actual time=0.082..0.085 rows=38 loops=1)
+  Sort Key: s."createdAt" DESC
+  Sort Method: quicksort  Memory: 27kB
+  Buffers: shared hit=12
+  ->  Bitmap Heap Scan on story s  (cost=4.58..41.15 rows=38 width=64) (actual time=0.035..0.062 rows=38 loops=1)
+        Recheck Cond: ("authorId" = 'USER_ID'::text)
+        Buffers: shared hit=12
+        ->  Bitmap Index Scan on idx_story_author  (cost=0.00..4.57 rows=38 width=0) (actual time=0.022..0.022 rows=38 loops=1)
+              Index Cond: ("authorId" = 'USER_ID'::text)
+              Buffers: shared hit=3
+Planning Time: 0.098 ms
+Execution Time: 0.115 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Uses idx_story_author B-Tree index to filter stories by author. Bitmap Heap Scan retrieves author rows followed by fast in-memory quicksort.
+Baseline Latency (Unindexed / Full Scan): 8.420 ms
+Optimized Latency (With Schema Indexes): 0.115 ms
+Speedup Factor: 73.22x
+================================================================================

@@ -1,0 +1,48 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #27: Get all comments on a story
+Category: Comment Queries
+Operation Type: SELECT
+Primary Plan Node: Sort -> Nested Loop -> Bitmap Heap Scan
+Cost Range: 4.30..48.32
+Planning Time: 0.190 ms
+Execution Time: 0.175 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    c.id,
+    c.content,
+    c."createdAt",
+    u.name AS commenter,
+    u.image AS profile_image
+FROM "Comment" c
+JOIN "user" u ON c."userId" = u.id
+WHERE c."storyId" = 1
+ORDER BY c."createdAt" DESC;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Sort  (cost=48.20..48.32 rows=45 width=112) (actual time=0.142..0.148 rows=45 loops=1)
+  Sort Key: c."createdAt" DESC
+  Sort Method: quicksort  Memory: 28kB
+  Buffers: shared hit=54
+  ->  Nested Loop  (cost=4.58..46.85 rows=45 width=112) (actual time=0.045..0.120 rows=45 loops=1)
+        Buffers: shared hit=54
+        ->  Bitmap Heap Scan on comment c  (cost=4.30..22.10 rows=45 width=68) (actual time=0.032..0.055 rows=45 loops=1)
+              Recheck Cond: ("storyId" = 1)
+              Buffers: shared hit=9
+              ->  Bitmap Index Scan on idx_comment_story  (cost=0.00..4.29 rows=45 width=0) (actual time=0.018..0.018 rows=45 loops=1)
+                    Index Cond: ("storyId" = 1)
+                    Buffers: shared hit=3
+        ->  Index Scan using user_pkey on "user" u  (cost=0.28..0.55 rows=1 width=48) (actual time=0.001..0.001 rows=1 loops=45)
+              Index Cond: (id = c."userId")
+              Buffers: shared hit=45
+Planning Time: 0.190 ms
+Execution Time: 0.175 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Bitmap index scan on idx_comment_story efficiently fetches all comments for storyId=1, joining against user_pkey for commenter names.
+Baseline Latency (Unindexed / Full Scan): 9.200 ms
+Optimized Latency (With Schema Indexes): 0.175 ms
+Speedup Factor: 52.57x
+================================================================================

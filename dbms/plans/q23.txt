@@ -1,0 +1,31 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #23: Bookmark a story
+Category: Bookmark Queries
+Operation Type: INSERT
+Primary Plan Node: Insert on bookmark (ON CONFLICT)
+Cost Range: 0.00..0.01
+Planning Time: 0.065 ms
+Execution Time: 0.082 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+INSERT INTO "Bookmark" ("userId", "storyId")
+VALUES ('USER_ID', 1)
+ON CONFLICT ("userId", "storyId") DO NOTHING;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Insert on bookmark  (cost=0.00..0.01 rows=1 width=40) (actual time=0.062..0.063 rows=1 loops=1)
+  Conflict Resolution: NOTHING
+  Conflict Arbiter Indexes: bookmark_userId_storyId_key
+  Buffers: shared hit=5 dirtied=1
+  ->  Result  (cost=0.00..0.01 rows=1 width=40) (actual time=0.002..0.002 rows=1 loops=1)
+Planning Time: 0.065 ms
+Execution Time: 0.082 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Idempotent insert into bookmark table utilizing composite unique index bookmark_userId_storyId_key.
+Baseline Latency (Unindexed / Full Scan): 0.082 ms
+Optimized Latency (With Schema Indexes): 0.082 ms
+Speedup Factor: 1.00x
+================================================================================

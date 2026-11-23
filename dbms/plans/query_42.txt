@@ -1,0 +1,36 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #42: Calculate total successful revenue
+Category: Payment Queries
+Operation Type: SELECT
+Primary Plan Node: HashAggregate -> Seq Scan
+Cost Range: 0.00..500.05
+Planning Time: 0.065 ms
+Execution Time: 3.160 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    currency,
+    SUM(amount) AS total_revenue
+FROM "Payment"
+WHERE status = 'SUCCESS'
+GROUP BY currency;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+HashAggregate  (cost=500.00..500.05 rows=2 width=36) (actual time=3.120..3.122 rows=1 loops=1)
+  Group Key: currency
+  Batches: 1  Memory Usage: 24kB
+  Buffers: shared hit=485
+  ->  Seq Scan on payment  (cost=0.00..465.00 rows=14000 width=10) (actual time=0.012..1.850 rows=14000 loops=1)
+        Filter: (status = 'SUCCESS'::"PaymentStatus")
+        Buffers: shared hit=485
+Planning Time: 0.065 ms
+Execution Time: 3.160 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Single-pass aggregation summing revenue across filtered successful payments in 3.16ms.
+Baseline Latency (Unindexed / Full Scan): 3.160 ms
+Optimized Latency (With Schema Indexes): 3.160 ms
+Speedup Factor: 1.00x
+================================================================================

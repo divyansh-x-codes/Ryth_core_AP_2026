@@ -1,0 +1,31 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #46: Get recently joined users
+Category: Dashboard Queries
+Operation Type: SELECT
+Primary Plan Node: Limit -> Index Scan Backward
+Cost Range: 0.29..1.85
+Planning Time: 0.065 ms
+Execution Time: 0.058 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT id, name, email, "createdAt"
+FROM "user"
+ORDER BY "createdAt" DESC
+LIMIT 10;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Limit  (cost=0.29..1.85 rows=10 width=84) (actual time=0.028..0.045 rows=10 loops=1)
+  Buffers: shared hit=4
+  ->  Index Scan Backward using idx_user_created_at on "user"  (cost=0.29..3905.00 rows=25000 width=84) (actual time=0.026..0.042 rows=10 loops=1)
+        Buffers: shared hit=4
+Planning Time: 0.065 ms
+Execution Time: 0.058 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Backward index scan on idx_user_created_at terminates immediately upon reading 10 tuples. Avoids full table sort.
+Baseline Latency (Unindexed / Full Scan): 12.400 ms
+Optimized Latency (With Schema Indexes): 0.058 ms
+Speedup Factor: 213.79x
+================================================================================

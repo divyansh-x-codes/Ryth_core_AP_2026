@@ -1,0 +1,32 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #05: Update user role
+Category: User Queries
+Operation Type: UPDATE
+Primary Plan Node: Update -> Index Scan (user_pkey)
+Cost Range: 0.29..8.31
+Planning Time: 0.112 ms
+Execution Time: 0.285 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+UPDATE "user"
+SET role = 'creator',
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE id = 'usr_c8f2a1b9';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Update on "user"  (cost=0.29..8.31 rows=1 width=170) (actual time=0.260..0.261 rows=1 loops=1)
+  Buffers: shared hit=7 dirtied=2
+  ->  Index Scan using user_pkey on "user"  (cost=0.29..8.31 rows=1 width=170) (actual time=0.025..0.027 rows=1 loops=1)
+        Index Cond: (id = 'usr_c8f2a1b9'::text)
+        Buffers: shared hit=3
+Planning Time: 0.112 ms
+Execution Time: 0.285 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Target row identified in 0.027ms via Primary Key index (user_pkey). Row version written into page buffer with updated timestamp and role, dirtying 2 buffers.
+Baseline Latency (Unindexed / Full Scan): 4.120 ms
+Optimized Latency (With Schema Indexes): 0.285 ms
+Speedup Factor: 14.46x
+================================================================================

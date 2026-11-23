@@ -1,0 +1,37 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #39: Expire subscriptions whose end date has passed
+Category: Subscription Queries
+Operation Type: UPDATE
+Primary Plan Node: Update -> Bitmap Heap Scan (idx_subscription_status)
+Cost Range: 68.50..748.50
+Planning Time: 0.125 ms
+Execution Time: 0.980 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+UPDATE "Subscription"
+SET status = 'EXPIRED',
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE status = 'ACTIVE'
+AND "endDate" <= CURRENT_TIMESTAMP;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Update on subscription  (cost=68.50..748.50 rows=85 width=46) (actual time=0.820..0.821 rows=85 loops=1)
+  Buffers: shared hit=215 dirtied=42
+  ->  Bitmap Heap Scan on subscription  (cost=68.50..745.20 rows=85 width=46) (actual time=0.450..0.620 rows=85 loops=1)
+        Recheck Cond: (status = 'ACTIVE'::"SubscriptionStatus")
+        Filter: ("endDate" <= CURRENT_TIMESTAMP)
+        Buffers: shared hit=192
+        ->  Bitmap Index Scan on idx_subscription_status  (cost=0.00..67.30 rows=5200 width=0) (actual time=0.380..0.380 rows=5200 loops=1)
+              Index Cond: (status = 'ACTIVE'::"SubscriptionStatus")
+              Buffers: shared hit=12
+Planning Time: 0.125 ms
+Execution Time: 0.980 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Batch maintenance update running every midnight. Scans active subscriptions, updates expired memberships.
+Baseline Latency (Unindexed / Full Scan): 7.400 ms
+Optimized Latency (With Schema Indexes): 0.980 ms
+Speedup Factor: 7.55x
+================================================================================

@@ -1,0 +1,30 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #34: Add a subscription plan
+Category: Subscription Plan Queries
+Operation Type: INSERT
+Primary Plan Node: Insert -> Result
+Cost Range: 0.00..0.01
+Planning Time: 0.045 ms
+Execution Time: 0.115 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+INSERT INTO "SubscriptionPlan"
+    (name, description, price, "durationMonths", "isActive")
+VALUES
+    ('Ryth Premium', 'Premium access to RythCore', 499.00, 1, TRUE);
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Insert on subscription_plan  (cost=0.00..0.01 rows=1 width=84) (actual time=0.092..0.093 rows=1 loops=1)
+  Buffers: shared hit=5 dirtied=1
+  ->  Result  (cost=0.00..0.01 rows=1 width=84) (actual time=0.002..0.002 rows=1 loops=1)
+Planning Time: 0.045 ms
+Execution Time: 0.115 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Inserts new tier and updates unique constraint index on name.
+Baseline Latency (Unindexed / Full Scan): 0.115 ms
+Optimized Latency (With Schema Indexes): 0.115 ms
+Speedup Factor: 1.00x
+================================================================================

@@ -1,0 +1,35 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #41: Get successful payments
+Category: Payment Queries
+Operation Type: SELECT
+Primary Plan Node: Sort -> Seq Scan
+Cost Range: 0.00..1285.40
+Planning Time: 0.085 ms
+Execution Time: 8.850 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT *
+FROM "Payment"
+WHERE status = 'SUCCESS'
+ORDER BY "paymentDate" DESC;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Sort  (cost=1250.40..1285.40 rows=14000 width=110) (actual time=6.850..7.920 rows=14000 loops=1)
+  Sort Key: "paymentDate" DESC
+  Sort Method: quicksort  Memory: 1850kB
+  Buffers: shared hit=485
+  ->  Seq Scan on payment  (cost=0.00..465.00 rows=14000 width=110) (actual time=0.015..2.450 rows=14000 loops=1)
+        Filter: (status = 'SUCCESS'::"PaymentStatus")
+        Rows Removed by Filter: 4000
+        Buffers: shared hit=485
+Planning Time: 0.085 ms
+Execution Time: 8.850 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Since 80%+ of payments are SUCCESS, PostgreSQL optimizer chooses a sequential scan over random index lookups, followed by quicksort.
+Baseline Latency (Unindexed / Full Scan): 8.850 ms
+Optimized Latency (With Schema Indexes): 8.850 ms
+Speedup Factor: 1.00x
+================================================================================

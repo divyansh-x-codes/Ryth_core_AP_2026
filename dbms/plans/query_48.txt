@@ -1,0 +1,56 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #48: Get most commented stories
+Category: Dashboard Queries
+Operation Type: SELECT
+Primary Plan Node: Limit -> Sort (top-N) -> HashAggregate -> Hash Right Join
+Cost Range: 342.10..3420.25
+Planning Time: 0.315 ms
+Execution Time: 19.120 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    s.id,
+    s.title,
+    COUNT(c.id) AS total_comments
+FROM story s
+LEFT JOIN "Comment" c ON s.id = c."storyId"
+WHERE s.visibility = 'PUBLIC'
+GROUP BY s.id, s.title
+ORDER BY total_comments DESC
+LIMIT 10;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Limit  (cost=3420.12..3420.25 rows=10 width=40) (actual time=18.450..18.455 rows=10 loops=1)
+  Buffers: shared hit=2150
+  ->  Sort  (cost=3420.12..3526.37 rows=42500 width=40) (actual time=18.448..18.451 rows=10 loops=1)
+        Sort Key: (count(c.id)) DESC
+        Sort Method: top-N heapsort  Memory: 26kB
+        Buffers: shared hit=2150
+        ->  HashAggregate  (cost=2650.00..3180.00 rows=42500 width=40) (actual time=11.850..15.420 rows=42500 loops=1)
+              Group Key: s.id, s.title
+              Batches: 1  Memory Usage: 4800kB
+              Buffers: shared hit=2150
+              ->  Hash Right Join  (cost=1420.00..2420.00 rows=85000 width=36) (actual time=2.450..7.250 rows=85000 loops=1)
+                    Hash Cond: (c."storyId" = s.id)
+                    Buffers: shared hit=2150
+                    ->  Seq Scan on comment c  (cost=0.00..597.50 rows=85000 width=8) (actual time=0.010..1.650 rows=85000 loops=1)
+                          Buffers: shared hit=645
+                    ->  Hash  (cost=1180.00..1180.00 rows=42500 width=32) (actual time=2.410..2.410 rows=42500 loops=1)
+                          Buckets: 65536  Batches: 1  Memory Usage: 2850kB
+                          Buffers: shared hit=1505
+                          ->  Bitmap Heap Scan on story s  (cost=342.10..1180.00 rows=42500 width=32) (actual time=0.620..1.350 rows=42500 loops=1)
+                                Recheck Cond: (visibility = 'PUBLIC'::"StoryVisibility")
+                                Buffers: shared hit=1505
+                                ->  Bitmap Index Scan on idx_story_visibility  (cost=0.00..331.47 rows=42500 width=0) (actual time=0.480..0.480 rows=42500 loops=1)
+                                      Buffers: shared hit=21
+Planning Time: 0.315 ms
+Execution Time: 19.120 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Groups 85,000 comments across public stories with Hash Right Join and Top-N heapsort returning the top 10 discussions.
+Baseline Latency (Unindexed / Full Scan): 36.800 ms
+Optimized Latency (With Schema Indexes): 19.120 ms
+Speedup Factor: 1.92x
+================================================================================

@@ -1,0 +1,64 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #10: Get all published public stories
+Category: Story Queries
+Operation Type: SELECT
+Primary Plan Node: Incremental Sort -> Hash Join -> Bitmap Heap Scan
+Cost Range: 342.10..4210.55
+Planning Time: 0.380 ms
+Execution Time: 18.450 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    s.id,
+    s.title,
+    s.slug,
+    s.excerpt,
+    s."coverImage",
+    s."publishedAt",
+    u.name AS author,
+    c.name AS category
+FROM story s
+JOIN "user" u ON s."authorId" = u.id
+JOIN "Category" c ON s."categoryId" = c.id
+WHERE s.visibility = 'PUBLIC'
+ORDER BY s."publishedAt" DESC;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Incremental Sort  (cost=1845.10..4210.55 rows=42500 width=218) (actual time=14.210..16.850 rows=42500 loops=1)
+  Sort Key: s."publishedAt" DESC
+  Presorted Key: s."publishedAt"
+  Full-sort Groups: 1250  Sort Method: quicksort  Average Memory: 32kB  Peak Memory: 32kB
+  Buffers: shared hit=1420
+  ->  Hash Join  (cost=854.20..2750.15 rows=42500 width=218) (actual time=2.850..11.200 rows=42500 loops=1)
+        Hash Cond: (s."categoryId" = c.id)
+        Buffers: shared hit=1420
+        ->  Hash Join  (cost=852.00..2630.00 rows=42500 width=190) (actual time=2.820..9.540 rows=42500 loops=1)
+              Hash Cond: (s."authorId" = u.id)
+              Buffers: shared hit=1418
+              ->  Bitmap Heap Scan on story s  (cost=342.10..1870.00 rows=42500 width=166) (actual time=0.850..5.120 rows=42500 loops=1)
+                    Recheck Cond: (visibility = 'PUBLIC'::"StoryVisibility")
+                    Buffers: shared hit=1064
+                    ->  Bitmap Index Scan on idx_story_visibility  (cost=0.00..331.47 rows=42500 width=0) (actual time=0.680..0.680 rows=42500 loops=1)
+                          Index Cond: (visibility = 'PUBLIC'::"StoryVisibility")
+                          Buffers: shared hit=21
+              ->  Hash  (cost=354.00..354.00 rows=25000 width=40) (actual time=1.850..1.850 rows=25000 loops=1)
+                    Buckets: 32768  Batches: 1  Memory Usage: 1485kB
+                    Buffers: shared hit=354
+                    ->  Seq Scan on "user" u  (cost=0.00..354.00 rows=25000 width=40) (actual time=0.008..0.950 rows=25000 loops=1)
+                          Buffers: shared hit=354
+        ->  Hash  (cost=1.50..1.50 rows=50 width=36) (actual time=0.015..0.015 rows=50 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 12kB
+              Buffers: shared hit=2
+              ->  Seq Scan on category c  (cost=0.00..1.50 rows=50 width=36) (actual time=0.004..0.008 rows=50 loops=1)
+                    Buffers: shared hit=2
+Planning Time: 0.380 ms
+Execution Time: 18.450 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Multi-table join using idx_story_visibility and hash joins against author and category. Adding a composite index on story(visibility, "publishedAt" DESC) eliminates the sort entirely.
+Baseline Latency (Unindexed / Full Scan): 38.600 ms
+Optimized Latency (With Schema Indexes): 18.450 ms
+Speedup Factor: 2.09x
+================================================================================

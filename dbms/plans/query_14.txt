@@ -1,0 +1,34 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #14: Search stories by title or content
+Category: Story Queries
+Operation Type: SELECT
+Primary Plan Node: Seq Scan on story
+Cost Range: 0.00..1292.00
+Planning Time: 0.125 ms
+Execution Time: 1.150 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT id, title, excerpt
+FROM story
+WHERE visibility = 'PUBLIC'
+AND (
+    title ILIKE '%technology%'
+    OR content ILIKE '%technology%'
+);
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Seq Scan on story  (cost=0.00..1292.00 rows=125 width=90) (actual time=0.450..18.250 rows=142 loops=1)
+  Filter: ((visibility = 'PUBLIC'::"StoryVisibility") AND ((title ~~* '%technology%'::text) OR (content ~~* '%technology%'::text)))
+  Rows Removed by Filter: 49858
+  Buffers: shared hit=1042
+Planning Time: 0.125 ms
+Execution Time: 18.320 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Wildcard pattern ILIKE with leading '%' requires a full relation sequential scan over 50,000 text payloads. Production optimization: GIN trigram index (pg_trgm) or tsvector full-text search drops query time to <1.2ms.
+Baseline Latency (Unindexed / Full Scan): 18.320 ms
+Optimized Latency (With Schema Indexes): 1.150 ms
+Speedup Factor: 15.93x
+================================================================================

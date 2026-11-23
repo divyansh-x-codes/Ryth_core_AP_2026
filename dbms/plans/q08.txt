@@ -1,0 +1,28 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #08: Add a new category
+Category: Category Queries
+Operation Type: INSERT
+Primary Plan Node: Insert -> Result
+Cost Range: 0.00..0.01
+Planning Time: 0.042 ms
+Execution Time: 0.180 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+INSERT INTO "Category" (name, description)
+VALUES ('Technology', 'Technology, innovation and digital trends');
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Insert on category  (cost=0.00..0.01 rows=1 width=76) (actual time=0.165..0.166 rows=1 loops=1)
+  Buffers: shared hit=4 dirtied=1
+  ->  Result  (cost=0.00..0.01 rows=1 width=76) (actual time=0.002..0.002 rows=1 loops=1)
+Planning Time: 0.042 ms
+Execution Time: 0.180 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Inserts tuple into category relation and updates unique B-Tree index on name and primary key index on id.
+Baseline Latency (Unindexed / Full Scan): 0.180 ms
+Optimized Latency (With Schema Indexes): 0.180 ms
+Speedup Factor: 1.00x
+================================================================================

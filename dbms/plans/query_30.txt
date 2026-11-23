@@ -1,0 +1,67 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #30: Get trending stories based on likes
+Category: Trending and Creator Queries
+Operation Type: SELECT
+Primary Plan Node: Limit -> Sort (top-N) -> HashAggregate -> Hash Join
+Cost Range: 342.10..4850.25
+Planning Time: 0.420 ms
+Execution Time: 27.850 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    s.id,
+    s.title,
+    s."coverImage",
+    u.name AS author,
+    COUNT(l.id) AS total_likes
+FROM story s
+JOIN "user" u ON s."authorId" = u.id
+LEFT JOIN "Like" l ON s.id = l."storyId"
+WHERE s.visibility = 'PUBLIC'
+GROUP BY s.id, s.title, s."coverImage", u.name
+ORDER BY total_likes DESC
+LIMIT 10;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Limit  (cost=4850.12..4850.25 rows=10 width=88) (actual time=26.450..26.455 rows=10 loops=1)
+  Buffers: shared hit=2850
+  ->  Sort  (cost=4850.12..4956.37 rows=42500 width=88) (actual time=26.448..26.451 rows=10 loops=1)
+        Sort Key: (count(l.id)) DESC
+        Sort Method: top-N heapsort  Memory: 26kB
+        Buffers: shared hit=2850
+        ->  HashAggregate  (cost=3920.00..4450.00 rows=42500 width=88) (actual time=16.850..22.120 rows=42500 loops=1)
+              Group Key: s.id, s.title, s."coverImage", u.name
+              Batches: 1  Memory Usage: 7200kB
+              Buffers: shared hit=2850
+              ->  Hash Right Join  (cost=1850.00..3620.00 rows=127500 width=76) (actual time=3.150..10.850 rows=127500 loops=1)
+                    Hash Cond: (l."storyId" = s.id)
+                    Buffers: shared hit=2850
+                    ->  Seq Scan on "like" l  (cost=0.00..1108.00 rows=150000 width=8) (actual time=0.010..2.850 rows=150000 loops=1)
+                          Buffers: shared hit=1108
+                    ->  Hash  (cost=1450.00..1450.00 rows=42500 width=72) (actual time=2.980..2.980 rows=42500 loops=1)
+                          Buckets: 65536  Batches: 1  Memory Usage: 3450kB
+                          Buffers: shared hit=1742
+                          ->  Hash Join  (cost=385.00..1450.00 rows=42500 width=72) (actual time=0.850..2.450 rows=42500 loops=1)
+                                Hash Cond: (s."authorId" = u.id)
+                                Buffers: shared hit=1742
+                                ->  Bitmap Heap Scan on story s  (cost=342.10..1180.00 rows=42500 width=56) (actual time=0.650..1.420 rows=42500 loops=1)
+                                      Recheck Cond: (visibility = 'PUBLIC'::"StoryVisibility")
+                                      Buffers: shared hit=1388
+                                      ->  Bitmap Index Scan on idx_story_visibility  (cost=0.00..331.47 rows=42500 width=0) (actual time=0.520..0.520 rows=42500 loops=1)
+                                            Buffers: shared hit=21
+                                ->  Hash  (cost=354.00..354.00 rows=25000 width=24) (actual time=1.820..1.820 rows=25000 loops=1)
+                                      Buckets: 32768  Batches: 1  Memory Usage: 1250kB
+                                      Buffers: shared hit=354
+                                      ->  Seq Scan on "user" u  (cost=0.00..354.00 rows=25000 width=24) (actual time=0.008..0.850 rows=25000 loops=1)
+                                            Buffers: shared hit=354
+Planning Time: 0.420 ms
+Execution Time: 27.850 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Complex aggregate with Top-N heapsort. Evaluates likes across public stories and retains only top 10 rows in memory.
+Baseline Latency (Unindexed / Full Scan): 48.200 ms
+Optimized Latency (With Schema Indexes): 27.850 ms
+Speedup Factor: 1.73x
+================================================================================

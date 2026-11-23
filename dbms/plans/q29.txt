@@ -1,0 +1,32 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #29: Delete a comment
+Category: Comment Queries
+Operation Type: DELETE
+Primary Plan Node: Delete -> Index Scan (comment_pkey)
+Cost Range: 0.29..8.31
+Planning Time: 0.078 ms
+Execution Time: 0.110 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+DELETE FROM "Comment"
+WHERE id = 1
+AND "userId" = 'USER_ID';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Delete on comment  (cost=0.29..8.31 rows=1 width=6) (actual time=0.085..0.086 rows=1 loops=1)
+  Buffers: shared hit=7 dirtied=1
+  ->  Index Scan using comment_pkey on comment  (cost=0.29..8.31 rows=1 width=6) (actual time=0.020..0.022 rows=1 loops=1)
+        Index Cond: (id = 1)
+        Filter: ("userId" = 'USER_ID'::text)
+        Buffers: shared hit=3
+Planning Time: 0.078 ms
+Execution Time: 0.110 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Single row deletion using comment_pkey with security check on userId.
+Baseline Latency (Unindexed / Full Scan): 4.500 ms
+Optimized Latency (With Schema Indexes): 0.110 ms
+Speedup Factor: 40.91x
+================================================================================

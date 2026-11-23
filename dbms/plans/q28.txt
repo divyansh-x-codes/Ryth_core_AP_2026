@@ -1,0 +1,34 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #28: Update a comment
+Category: Comment Queries
+Operation Type: UPDATE
+Primary Plan Node: Update -> Index Scan (comment_pkey)
+Cost Range: 0.29..8.31
+Planning Time: 0.082 ms
+Execution Time: 0.195 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+UPDATE "Comment"
+SET content = 'Updated comment',
+    "updatedAt" = CURRENT_TIMESTAMP
+WHERE id = 1
+AND "userId" = 'USER_ID';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Update on comment  (cost=0.29..8.31 rows=1 width=86) (actual time=0.172..0.173 rows=1 loops=1)
+  Buffers: shared hit=8 dirtied=2
+  ->  Index Scan using comment_pkey on comment  (cost=0.29..8.31 rows=1 width=86) (actual time=0.021..0.023 rows=1 loops=1)
+        Index Cond: (id = 1)
+        Filter: ("userId" = 'USER_ID'::text)
+        Buffers: shared hit=3
+Planning Time: 0.082 ms
+Execution Time: 0.195 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Checks comment ownership via filter on userId after primary key lookup.
+Baseline Latency (Unindexed / Full Scan): 4.500 ms
+Optimized Latency (With Schema Indexes): 0.195 ms
+Speedup Factor: 23.08x
+================================================================================

@@ -1,0 +1,28 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #26: Add a comment to a story
+Category: Comment Queries
+Operation Type: INSERT
+Primary Plan Node: Insert on comment
+Cost Range: 0.00..0.01
+Planning Time: 0.052 ms
+Execution Time: 0.095 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+INSERT INTO "Comment" ("content", "userId", "storyId")
+VALUES ('This is a very informative story.', 'USER_ID', 1);
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Insert on comment  (cost=0.00..0.01 rows=1 width=80) (actual time=0.072..0.073 rows=1 loops=1)
+  Buffers: shared hit=7 dirtied=2
+  ->  Result  (cost=0.00..0.01 rows=1 width=80) (actual time=0.002..0.002 rows=1 loops=1)
+Planning Time: 0.052 ms
+Execution Time: 0.095 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Inserts comment row, generating new auto-increment SERIAL id and updating idx_comment_story and idx_comment_user indexes.
+Baseline Latency (Unindexed / Full Scan): 0.095 ms
+Optimized Latency (With Schema Indexes): 0.095 ms
+Speedup Factor: 1.00x
+================================================================================

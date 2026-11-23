@@ -1,0 +1,57 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #37: Get all currently active subscriptions
+Category: Subscription Queries
+Operation Type: SELECT
+Primary Plan Node: Hash Join -> Bitmap Heap Scan (idx_subscription_status)
+Cost Range: 68.50..1150.80
+Planning Time: 0.310 ms
+Execution Time: 5.650 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    u.name,
+    u.email,
+    p.name AS plan_name,
+    sub."startDate",
+    sub."endDate"
+FROM "Subscription" sub
+JOIN "user" u ON sub."userId" = u.id
+JOIN "SubscriptionPlan" p ON sub."planId" = p.id
+WHERE sub.status = 'ACTIVE'
+AND sub."endDate" > CURRENT_TIMESTAMP;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Hash Join  (cost=425.20..1150.80 rows=4800 width=92) (actual time=1.850..5.120 rows=4800 loops=1)
+  Hash Cond: (sub."planId" = p.id)
+  Buffers: shared hit=548
+  ->  Hash Join  (cost=423.50..1135.00 rows=4800 width=76) (actual time=1.820..4.250 rows=4800 loops=1)
+        Hash Cond: (sub."userId" = u.id)
+        Buffers: shared hit=546
+        ->  Bitmap Heap Scan on subscription sub  (cost=68.50..745.20 rows=4800 width=40) (actual time=0.450..1.850 rows=4800 loops=1)
+              Recheck Cond: (status = 'ACTIVE'::"SubscriptionStatus")
+              Filter: ("endDate" > CURRENT_TIMESTAMP)
+              Buffers: shared hit=192
+              ->  Bitmap Index Scan on idx_subscription_status  (cost=0.00..67.30 rows=5200 width=0) (actual time=0.380..0.380 rows=5200 loops=1)
+                    Index Cond: (status = 'ACTIVE'::"SubscriptionStatus")
+                    Buffers: shared hit=12
+        ->  Hash  (cost=354.00..354.00 rows=25000 width=44) (actual time=1.350..1.350 rows=25000 loops=1)
+              Buckets: 32768  Batches: 1  Memory Usage: 1350kB
+              Buffers: shared hit=354
+              ->  Seq Scan on "user" u  (cost=0.00..354.00 rows=25000 width=44) (actual time=0.008..0.720 rows=25000 loops=1)
+                    Buffers: shared hit=354
+  ->  Hash  (cost=1.12..1.12 rows=10 width=24) (actual time=0.012..0.012 rows=10 loops=1)
+        Buckets: 1024  Batches: 1  Memory Usage: 9kB
+        Buffers: shared hit=2
+        ->  Seq Scan on subscription_plan p  (cost=0.00..1.12 rows=10 width=24) (actual time=0.004..0.007 rows=10 loops=1)
+              Buffers: shared hit=2
+Planning Time: 0.310 ms
+Execution Time: 5.650 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Bitmap index scan on idx_subscription_status filters active rows, followed by Hash Join against users and plans.
+Baseline Latency (Unindexed / Full Scan): 14.800 ms
+Optimized Latency (With Schema Indexes): 5.650 ms
+Speedup Factor: 2.62x
+================================================================================

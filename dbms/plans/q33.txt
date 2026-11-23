@@ -1,0 +1,34 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #33: Get all active subscription plans
+Category: Subscription Plan Queries
+Operation Type: SELECT
+Primary Plan Node: Sort -> Seq Scan
+Cost Range: 0.00..1.17
+Planning Time: 0.055 ms
+Execution Time: 0.045 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT *
+FROM "SubscriptionPlan"
+WHERE "isActive" = TRUE
+ORDER BY price ASC;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Sort  (cost=1.15..1.17 rows=8 width=84) (actual time=0.032..0.034 rows=8 loops=1)
+  Sort Key: price
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=1
+  ->  Seq Scan on subscription_plan  (cost=0.00..1.12 rows=8 width=84) (actual time=0.012..0.016 rows=8 loops=1)
+        Filter: ("isActive" = true)
+        Buffers: shared hit=1
+Planning Time: 0.055 ms
+Execution Time: 0.045 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Subscription plan table fits within a single 8KB disk page. Seq scan with in-memory quicksort completes in 45 microseconds.
+Baseline Latency (Unindexed / Full Scan): 0.045 ms
+Optimized Latency (With Schema Indexes): 0.045 ms
+Speedup Factor: 1.00x
+================================================================================

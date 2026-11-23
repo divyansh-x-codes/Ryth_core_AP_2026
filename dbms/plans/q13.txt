@@ -1,0 +1,49 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #13: Get stories belonging to a category
+Category: Story Queries
+Operation Type: SELECT
+Primary Plan Node: Sort -> Nested Loop -> Bitmap Heap Scan
+Cost Range: 8.16..187.25
+Planning Time: 0.210 ms
+Execution Time: 2.045 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    s.id,
+    s.title,
+    s.excerpt,
+    u.name AS author
+FROM story s
+JOIN "user" u ON s."authorId" = u.id
+WHERE s."categoryId" = 1
+AND s.visibility = 'PUBLIC'
+ORDER BY s."publishedAt" DESC;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Sort  (cost=185.12..187.25 rows=850 width=118) (actual time=1.850..1.920 rows=850 loops=1)
+  Sort Key: s."publishedAt" DESC
+  Sort Method: quicksort  Memory: 112kB
+  Buffers: shared hit=428
+  ->  Nested Loop  (cost=8.45..142.80 rows=850 width=118) (actual time=0.085..1.420 rows=850 loops=1)
+        Buffers: shared hit=428
+        ->  Bitmap Heap Scan on story s  (cost=8.16..85.20 rows=850 width=90) (actual time=0.065..0.450 rows=850 loops=1)
+              Recheck Cond: ("categoryId" = 1)
+              Filter: (visibility = 'PUBLIC'::"StoryVisibility")
+              Buffers: shared hit=65
+              ->  Bitmap Index Scan on idx_story_category  (cost=0.00..7.95 rows=1000 width=0) (actual time=0.045..0.045 rows=1000 loops=1)
+                    Index Cond: ("categoryId" = 1)
+                    Buffers: shared hit=4
+        ->  Index Scan using user_pkey on "user" u  (cost=0.28..0.68 rows=1 width=36) (actual time=0.001..0.001 rows=1 loops=850)
+              Index Cond: (id = s."authorId")
+              Buffers: shared hit=363
+Planning Time: 0.210 ms
+Execution Time: 2.045 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Utilizes idx_story_category index to find relevant category stories, then nested loops into user_pkey for author details.
+Baseline Latency (Unindexed / Full Scan): 12.500 ms
+Optimized Latency (With Schema Indexes): 2.045 ms
+Speedup Factor: 6.11x
+================================================================================

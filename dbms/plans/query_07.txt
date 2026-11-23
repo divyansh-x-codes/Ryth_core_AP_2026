@@ -1,0 +1,29 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #07: Find a category by name
+Category: Category Queries
+Operation Type: SELECT
+Primary Plan Node: Index Scan (category_name_key)
+Cost Range: 0.14..8.16
+Planning Time: 0.058 ms
+Execution Time: 0.027 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT *
+FROM "Category"
+WHERE name = 'Technology';
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Index Scan using category_name_key on category  (cost=0.14..8.16 rows=1 width=76) (actual time=0.018..0.020 rows=1 loops=1)
+  Index Cond: (name = 'Technology'::text)
+  Buffers: shared hit=2
+Planning Time: 0.058 ms
+Execution Time: 0.027 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Direct index probe on category_name_key. Single row retrieved in 0.020ms.
+Baseline Latency (Unindexed / Full Scan): 0.035 ms
+Optimized Latency (With Schema Indexes): 0.027 ms
+Speedup Factor: 1.30x
+================================================================================

@@ -1,0 +1,30 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #18: Delete a story
+Category: Story Queries
+Operation Type: DELETE
+Primary Plan Node: Delete -> Index Scan (story_pkey)
+Cost Range: 0.29..8.31
+Planning Time: 0.085 ms
+Execution Time: 0.380 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+DELETE FROM story
+WHERE id = 1;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Delete on story  (cost=0.29..8.31 rows=1 width=6) (actual time=0.345..0.346 rows=1 loops=1)
+  Buffers: shared hit=24 dirtied=6
+  ->  Index Scan using story_pkey on story  (cost=0.29..8.31 rows=1 width=6) (actual time=0.021..0.023 rows=1 loops=1)
+        Index Cond: (id = 1)
+        Buffers: shared hit=3
+Planning Time: 0.085 ms
+Execution Time: 0.380 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Deletes row via story_pkey. Cascades deletes to related like, bookmark, and comment rows using foreign key indexes idx_like_story, idx_bookmark_story, and idx_comment_story.
+Baseline Latency (Unindexed / Full Scan): 7.150 ms
+Optimized Latency (With Schema Indexes): 0.380 ms
+Speedup Factor: 18.82x
+================================================================================

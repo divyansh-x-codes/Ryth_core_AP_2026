@@ -1,0 +1,56 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #31: Get top creators based on published stories
+Category: Trending and Creator Queries
+Operation Type: SELECT
+Primary Plan Node: Limit -> Sort (top-N) -> HashAggregate -> Hash Join
+Cost Range: 342.10..2150.25
+Planning Time: 0.285 ms
+Execution Time: 13.120 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT
+    u.id,
+    u.name,
+    COUNT(s.id) AS published_stories
+FROM "user" u
+JOIN story s ON u.id = s."authorId"
+WHERE s.visibility = 'PUBLIC'
+GROUP BY u.id, u.name
+ORDER BY published_stories DESC
+LIMIT 10;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Limit  (cost=2150.12..2150.25 rows=10 width=40) (actual time=12.450..12.454 rows=10 loops=1)
+  Buffers: shared hit=1742
+  ->  Sort  (cost=2150.12..2156.37 rows=2500 width=40) (actual time=12.448..12.450 rows=10 loops=1)
+        Sort Key: (count(s.id)) DESC
+        Sort Method: top-N heapsort  Memory: 25kB
+        Buffers: shared hit=1742
+        ->  HashAggregate  (cost=1850.00..1920.00 rows=2500 width=40) (actual time=11.200..11.850 rows=2450 loops=1)
+              Group Key: u.id, u.name
+              Batches: 1  Memory Usage: 320kB
+              Buffers: shared hit=1742
+              ->  Hash Join  (cost=385.00..1637.50 rows=42500 width=36) (actual time=0.850..6.450 rows=42500 loops=1)
+                    Hash Cond: (s."authorId" = u.id)
+                    Buffers: shared hit=1742
+                    ->  Bitmap Heap Scan on story s  (cost=342.10..1180.00 rows=42500 width=16) (actual time=0.650..3.200 rows=42500 loops=1)
+                          Recheck Cond: (visibility = 'PUBLIC'::"StoryVisibility")
+                          Buffers: shared hit=1388
+                          ->  Bitmap Index Scan on idx_story_visibility  (cost=0.00..331.47 rows=42500 width=0) (actual time=0.510..0.510 rows=42500 loops=1)
+                                Buffers: shared hit=21
+                    ->  Hash  (cost=354.00..354.00 rows=25000 width=24) (actual time=1.850..1.850 rows=25000 loops=1)
+                          Buckets: 32768  Batches: 1  Memory Usage: 1250kB
+                          Buffers: shared hit=354
+                          ->  Seq Scan on "user" u  (cost=0.00..354.00 rows=25000 width=24) (actual time=0.008..0.850 rows=25000 loops=1)
+                                Buffers: shared hit=354
+Planning Time: 0.285 ms
+Execution Time: 13.120 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Groups published stories by author and counts volume with Top-N heapsort limiting to top 10 creators.
+Baseline Latency (Unindexed / Full Scan): 32.500 ms
+Optimized Latency (With Schema Indexes): 13.120 ms
+Speedup Factor: 2.48x
+================================================================================

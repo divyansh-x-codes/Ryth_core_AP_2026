@@ -1,0 +1,32 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #06: Get all categories
+Category: Category Queries
+Operation Type: SELECT
+Primary Plan Node: Sort -> Seq Scan
+Cost Range: 0.00..2.45
+Planning Time: 0.062 ms
+Execution Time: 0.054 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+SELECT *
+FROM "Category"
+ORDER BY name;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Sort  (cost=2.32..2.45 rows=50 width=76) (actual time=0.042..0.045 rows=50 loops=1)
+  Sort Key: name
+  Sort Method: quicksort  Memory: 28kB
+  Buffers: shared hit=2
+  ->  Seq Scan on category  (cost=0.00..1.50 rows=50 width=76) (actual time=0.008..0.015 rows=50 loops=1)
+        Buffers: shared hit=2
+Planning Time: 0.062 ms
+Execution Time: 0.054 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Category table is small (50 rows across 2 8KB pages). Sequential scan is faster than index lookup due to zero tree traversal overhead.
+Baseline Latency (Unindexed / Full Scan): 0.054 ms
+Optimized Latency (With Schema Indexes): 0.054 ms
+Speedup Factor: 1.00x
+================================================================================

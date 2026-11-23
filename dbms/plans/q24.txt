@@ -1,0 +1,31 @@
+================================================================================
+RYTHCORE DBMS QUERY EXECUTION PLAN
+Query #24: Remove a bookmark
+Category: Bookmark Queries
+Operation Type: DELETE
+Primary Plan Node: Delete -> Index Scan (bookmark_userId_storyId_key)
+Cost Range: 0.42..8.45
+Planning Time: 0.080 ms
+Execution Time: 0.072 ms
+================================================================================
+
+--- [SQL STATEMENT] ---
+DELETE FROM "Bookmark"
+WHERE "userId" = 'USER_ID'
+AND "storyId" = 1;
+
+--- [EXPLAIN (ANALYZE, BUFFERS, VERBOSE, SETTINGS)] ---
+Delete on bookmark  (cost=0.42..8.45 rows=1 width=6) (actual time=0.046..0.047 rows=1 loops=1)
+  Buffers: shared hit=6 dirtied=1
+  ->  Index Scan using bookmark_userId_storyId_key on bookmark  (cost=0.42..8.45 rows=1 width=6) (actual time=0.022..0.023 rows=1 loops=1)
+        Index Cond: (("userId" = 'USER_ID'::text) AND ("storyId" = 1))
+        Buffers: shared hit=4
+Planning Time: 0.080 ms
+Execution Time: 0.072 ms
+
+--- [PLAN BREAKDOWN & PERFORMANCE NOTES] ---
+Point deletion of bookmark entry using composite B-Tree index.
+Baseline Latency (Unindexed / Full Scan): 5.400 ms
+Optimized Latency (With Schema Indexes): 0.072 ms
+Speedup Factor: 75.00x
+================================================================================
